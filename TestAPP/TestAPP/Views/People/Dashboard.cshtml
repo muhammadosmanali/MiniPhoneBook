@@ -1,0 +1,133 @@
+﻿@using TestAPP.Models
+@model IEnumerable<TestAPP.Models.Person>
+@{
+    ViewBag.Title = "Dashboard";
+}
+@{
+    <h2>Dashboard</h2>
+    <div class="row"></div>
+    <h4>Number of Added Persons: @Model.Count()</h4>
+    <div class="row"></div>
+}
+
+@{
+    List<Person> list1 = new List<Person>();
+    List<Person> list2 = new List<Person>();
+    var date = DateTime.Now.Date;
+    var day = 0;
+    var month = 0;
+    foreach (var person in Model)
+    {
+        string dob = person.DateOfBirth.Value.ToShortDateString();
+        if (dob.Length == 9)
+        {
+            if (dob.Substring(1, 1) == "/")
+            {
+                day = Convert.ToInt32(dob.Substring(2, 2));
+                month = Convert.ToInt32(dob.Substring(0, 1));
+            }
+            else
+            {
+                day = Convert.ToInt32(dob.Substring(3, 1));
+                month = Convert.ToInt32(dob.Substring(0, 2));
+            }
+        }
+        else if (dob.Length == 8)
+        {
+            day = Convert.ToInt32(dob.Substring(2, 1));
+            month = Convert.ToInt32(dob.Substring(0, 1));
+        }
+        else if (dob.Length == 10)
+        {
+            day = Convert.ToInt32(dob.Substring(3, 2));
+            month = Convert.ToInt32(dob.Substring(0, 2));
+        }
+        for (int i = 1; i <= 10; i++)
+        {
+            if (date.AddDays(i).Day == day && date.AddDays(i).Month == month)
+            {
+                list1.Add(person);
+            }
+        }
+        for (int i = 1; i < 8; i++)
+        {
+            if (date.AddDays(-i).Date == person.UpdateOn)
+            {
+                list2.Add(person);
+            }
+        }
+    }
+}
+
+@{
+    <h4>Persons Who have Birthday in Next 10 Days:</h4>
+    <div class="row"></div>
+    int counter = 1;
+    foreach (var item in list1)
+    {
+        <div>
+            <h5>Person @counter</h5>
+
+            <div class="row">
+                <div class="col-sm-6">
+                    <table class="table table-responsive">
+                        <tr>
+                            <td>@Html.DisplayNameFor(model => model.FirstName)</td>
+                            <td>@Html.DisplayFor(model => item.FirstName)</td>
+                        </tr>
+                        <tr>
+                            <td>@Html.DisplayNameFor(model => model.MiddleName)</td>
+                            <td>@Html.DisplayFor(model => item.MiddleName)</td>
+                        </tr>
+                        <tr>
+                            <td>@Html.DisplayNameFor(model => model.LastName)</td>
+                            <td>@Html.DisplayFor(model => item.LastName)</td>
+                        </tr>
+                        <tr>
+                            <td>@Html.DisplayNameFor(model => model.DateOfBirth)</td>
+                            <td>@Html.DisplayFor(model => item.DateOfBirth)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        counter++;
+    }
+}
+
+@{
+    <div class="row"></div>
+    <h4>Person's Who's data has been updated in las 7 Day's</h4>
+    <div class="row"></div>
+
+    <div class="container">
+        <div class="col-md-4">
+            <table class="table table-condensed table-bordered table-hover small">
+                <thead>
+                <tbody>
+                    @if (!list2.Any())
+                    {
+                        <tr>
+                            No Person in the List
+                        </tr>
+                    <td>
+                        Updated in last 7 days
+                    </td>
+                    }
+                    @foreach (var person in list2)
+                    {
+                        <tr>
+                            <td>
+                                @(person.FirstName + " " + person.MiddleName + " " + person.LastName)
+                            </td>
+                            <td>
+                                @person.UpdateOn.Value.ToShortDateString()
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                    </thead>
+                </table>
+            </div>
+        </div>
+}
