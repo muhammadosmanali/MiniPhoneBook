@@ -20,6 +20,8 @@ namespace TestAPP.Controllers
         [Authorize]
         public ActionResult Index()
         {
+            //To get person's added by relevent user
+            //get user id
             string user = User.Identity.GetUserId();
             ViewBag.FirstName = user;
             var people = db.People.Where(t => t.AddedBy == user).ToList();
@@ -31,9 +33,9 @@ namespace TestAPP.Controllers
         public ActionResult Dashboard()
         {
             List<Person> list = new List<Person>();
-            string user = System.Web.HttpContext.Current.User.Identity.Name;//User.Identity.GetUserId();
-            //var persons = db.People.Where(p => p.AddedBy == user).ToList();
-            foreach (var per in db.People.ToList())
+            string user = User.Identity.GetUserId();
+            var persons = db.People.Where(p => p.AddedBy == user).ToList();
+            foreach (var per in persons)
             {
                 list.Add(per);
             }
@@ -42,42 +44,50 @@ namespace TestAPP.Controllers
         // GET: People/Details/5
         public ActionResult Details(int? id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Person person = db.People.Find(id);
-            if (person == null)
-            {
-                return HttpNotFound();
-            }
-            return View(person);
+            var toGetDetails = db.People.Single(i => i.PersonId == id);
+            return View(toGetDetails);
         }
 
         // GET: People/Create
         [Authorize]
         public ActionResult Create()
         {
-            ViewBag.AddedBy = new SelectList(db.AspNetUsers, "Id", "Email");
+            //ViewBag.AddedBy = new SelectList(db.AspNetUsers, "Id", "Email");
             return View();
         }
         // POST: People/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Person/Create
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "PersonId,FirstName,MiddleName,LastName,DateOfBirth,AddedOn,AddedBy,HomeAddress,HomeCity,FaceBookAccountId,LinkedInId,UpdateOn,ImagePath,TwitterId,EmailId")] Person person)
+        public ActionResult Create(Person obj)
         {
-            if (ModelState.IsValid)
-            {
-                //person.AddedBy = User.Identity.
-                db.People.Add(person);
-                db.SaveChanges();
-                return RedirectToAction("Index");
-            }
+            // TODO: Add insert logic here
 
-            ViewBag.AddedBy = new SelectList(db.AspNetUsers, "Id", "Email", person.AddedBy);
-            return View(person);
+            // to get user identity 
+            String user = User.Identity.GetUserId();
+
+            Person p = new Person();
+            //set this new person from the data entered in the form
+
+            p.FirstName = obj.FirstName;
+            p.MiddleName = obj.MiddleName;
+            p.LastName = obj.LastName;
+            p.DateOfBirth = obj.DateOfBirth;
+            p.AddedOn = DateTime.Now;
+            p.AddedBy = user;
+            p.HomeAddress = obj.HomeAddress;
+            p.HomeCity = obj.HomeCity;
+            p.FaceBookAccountId = obj.FaceBookAccountId;
+            p.LinkedInId = obj.LinkedInId;
+            p.TwitterId = obj.TwitterId;
+            p.EmailId = obj.EmailId;
+
+            // add it into the database
+            db.People.Add(p);
+            //save update database
+            db.SaveChanges();
+            return RedirectToAction("Index");
         }
 
         // GET: People/Edit/5
@@ -101,7 +111,7 @@ namespace TestAPP.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "PersonId,FirstName,MiddleName,LastName,DateOfBirth,AddedOn,AddedBy,HomeAddress,HomeCity,FaceBookAccountId,LinkedInId,UpdateOn,ImagePath,TwitterId,EmailId")] Person person)
+        public ActionResult Edit([Bind(Include = "PersonId,FirstName,MiddleName,LastName,DateOfBirth,AddedOn,HomeAddress,HomeCity,FaceBookAccountId,LinkedInId,UpdateOn,TwitterId,EmailId")] Person person)
         {
             if (ModelState.IsValid)
             {

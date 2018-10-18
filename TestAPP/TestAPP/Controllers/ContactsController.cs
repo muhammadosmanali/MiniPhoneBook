@@ -19,8 +19,8 @@ namespace TestAPP.Controllers
         [Authorize]
         public ActionResult Index()
         {
-            string user = User.Identity.Name;
-            var contacts = db.Contacts.Include(c => c.Person);
+            string user = User.Identity.GetUserId();
+            var contacts = db.Contacts.Include(c => c.Person).Where(t => t.Person.AddedBy == user);
             return View(contacts.ToList());
         }
 
