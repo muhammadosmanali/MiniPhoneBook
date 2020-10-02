@@ -20,26 +20,39 @@ namespace TestAPP.Controllers
         [Authorize]
         public ActionResult Index()
         {
-            //To get person's added by relevent user
-            //get user id
-            string user = User.Identity.GetUserId();
-            ViewBag.FirstName = user;
-            var people = db.People.Where(t => t.AddedBy == user).ToList();
-            //var people = db.People.ToList();
-            return View(people);
+            try
+            {
+                //To get person's added by relevent user
+                //get user id
+                string user = User.Identity.GetUserId();
+                ViewBag.FirstName = user;
+                var people = db.People.Where(t => t.AddedBy == user).ToList();
+                //var people = db.People.ToList();
+                return View(people);
+            } catch {
+                return View();
+            }
         }
         // For Dsahboard
         [Authorize]
         public ActionResult Dashboard()
         {
-            List<Person> list = new List<Person>();
-            string user = User.Identity.GetUserId();
-            var persons = db.People.Where(p => p.AddedBy == user).ToList();
-            foreach (var per in persons)
+            try
             {
-                list.Add(per);
+                List<Person> list = new List<Person>();
+                string user = User.Identity.GetUserId();
+                var persons = db.People.Where(p => p.AddedBy == user).ToList();
+                foreach (var per in persons)
+                {
+                    list.Add(per);
+                }
+                ViewBag.message = "yes";
+                return View(list);
+            } catch
+            {
+                ViewBag.message = "No list Found";
+                return View();
             }
-            return View(list);
         }
         // GET: People/Details/5
         public ActionResult Details(int? id)
